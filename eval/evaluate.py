@@ -227,11 +227,14 @@ def run_full_evaluation():
     print(f"{'='*60}")
 
     results = {}
+    timings = {}
     for fn, label in [(evaluate_fast, "Fast RAG (pipeline)"), (evaluate_agentic, "Agentic RAG (2轮)")]:
         print(f"\n--- {label} ---")
         t0 = time.time()
         r = fn(qa)
         t = time.time() - t0
+        r["elapsed"] = int(t)
+        timings[label] = int(t)
         for d in r["details"]:
             d["cases"] = _count_cases(d.get("answer", ""))
             d["citations"] = _count_citations(d.get("answer", ""))
@@ -293,7 +296,8 @@ def _save_comparison(a: dict, f_r: dict, ts: str):
         fp.write(f"| 指标 | Fast (pipeline) | Agentic (2轮) | 提升 |\n|------|:---:|:---:|:---:|\n")
         fp.write(f"| 页码召回率 | {f_r['page_recall']:.0%} | **{a['page_recall']:.0%}** | — |\n")
         fp.write(f"| 内容准确性 | {f_r.get('content_avg',0):.0%} | **{a.get('content_avg',0):.0%}** | — |\n")
-        fp.write(f"| Unanswerable | {f_r.get('unans_acc',0):.0%} | **{a.get('unans_acc',0):.0%}** | — |\n\n")
+        fp.write(f"| Unanswerable | {f_r.get('unans_acc',0):.0%} | **{a.get('unans_acc',0):.0%}** | — |\n")
+        fp.write(f"| 评估耗时 | {f_r.get('elapsed',0)}s | {a.get('elapsed',0)}s | — |\n\n")
         fp.write(f"## 逐题对比\n\n")
         fp.write(f"| 问题 | Fast页面 | Fast内容 | A页面 | A内容 | Fast字 | A字 |\n")
         fp.write(f"|------|:---:|:---:|:---:|:---:|:---:|:---:|\n")

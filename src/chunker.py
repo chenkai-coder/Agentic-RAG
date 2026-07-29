@@ -2,8 +2,6 @@
 文本分块模块
 自实现递归字符分块器，按 \n\n > \n > 。> ； > ， > 空格 优先级切分，
 并在每个块中嵌入来源和页码元数据（Metadata-Enriched Chunking）。
-
-不依赖 langchain，避免 TensorFlow/Keras 兼容性问题。
 """
 
 from typing import List, Dict

@@ -59,10 +59,9 @@ AGENT_SYSTEM_PROMPT = """你是一个能够自主搜索文档库的智能问答�
 # Agent 工具实现
 # ============================================================
 def _search(query: str, source_hint: str = "") -> List[Dict]:
-    """搜索文档库，Dense+BM25+RRF+Reranker，返回 Top-8 结果（去重）。"""
+    """搜索文档库，Dense+BM25+RRF，返回 Top-8 结果（去重）。"""
     load_index()
 
-    # Dense + BM25 混合检索（大召回量）
     # Dense + BM25 混合检索（大召回量）
     dense = search_dense(query, top_k=40, source_filter=source_hint if source_hint else "")
 
@@ -90,8 +89,6 @@ def _search(query: str, source_hint: str = "") -> List[Dict]:
             bm25_combined.append(d)
 
     merged = rrf_fusion(dense, bm25_combined, source_hint=source_hint)
-
-    # Reranker 在 CPU 上慢且负分多，Agent 中禁用——RRF+BM25 已足够
 
     # 去重页面，BM25 按搜索查询分组取 top-1，保证多样性
     from collections import defaultdict
@@ -143,9 +140,6 @@ def _get_page(source: str, page: int) -> Optional[str]:
 
 # ============================================================
 # Agent 工具调用解析
-# ============================================================
-# ============================================================
-# ============================================================
 # 上下文压缩：去重 + BM25排序 + IDF Token级剪枝（类LLMLingua）
 # ============================================================
 def _compute_idf(tokenized_docs: List[List[str]]) -> Dict[str, float]:
