@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+*.egg
+
+# 虚拟环境
+venv/
+.venv/
+env/
+.conda/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude / AI 工具
+.claude/
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# 临时文件
+*.log
+*.tmp
+_test_*.txt
+_*.txt
+_*.json
+
+# 对话存档（个人数据）
+conversations/
+
+# 模型缓存（太大，需自行下载）
+E:/UltraRAG/
