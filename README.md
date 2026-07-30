@@ -78,29 +78,42 @@
 
 ```mermaid
 flowchart TB
-    subgraph Offline["🔨 离线构建"]
+    subgraph Offline["🔨 离线构建（python main.py build）"]
         direction TB
-        A1["产品手册.pdf (49页)"] --> B1["PyMuPDF 逐页解析"]
-        A2["杂志.pdf (132页)"] --> B1
+        A1["产品手册.pdf"] --> B1["PyMuPDF 逐页解析"]
+        A2["杂志.pdf"] --> B1
         B1 --> C1["递归字符分块<br/>短chunk自动附加上下文前缀"]
         C1 --> D1["API BGE-M3 Embedding<br/>1024维，硅基流动免费"]
         D1 --> E1["ChromaDB 向量库"]
         C1 --> E2["BM25 关键词索引"]
     end
 
-    subgraph Online["⚡ 在线问答"]
+    subgraph Fast["⚡ Fast RAG（pipeline 单次检索）"]
         direction TB
-        F1["用户问题"] --> G1["Agentic RAG 引擎"]
-        G1 --> H1["多路并行搜索<br/>Dense + BM25 + 约束HyDE<br/>Query分解 + 源文档感知"]
-        H1 --> I1["RRF 融合 + BM25按查询直通"]
-        I1 --> J1["上下文压缩<br/>页面去重 + BM25重排序 + 截断"]
-        J1 --> K1{"Agent 评估<br/>信息充足?"}
-        K1 -->|"否"| H1
-        K1 -->|"是"| L1["LLM 生成答案<br/>带页码引用标注"]
+        F1["用户问题"] --> F2["Query分解 + HyDE"]
+        F2 --> F3["Dense + BM25 并行检索"]
+        F3 --> F4["RRF 融合"]
+        F4 --> F5["BGE-Reranker 精排"]
+        F5 --> F6{"最高分≥阈值?"}
+        F6 -->|"否"| F7["返回: 文档中没有相关信息"]
+        F6 -->|"是"| F8["LLM 生成 + 引用"]
     end
 
-    E1 -.->|"加载"| H1
-    E2 -.->|"加载"| H1
+    subgraph Agentic["🤖 Agentic RAG（多轮推理）"]
+        direction TB
+        G1["用户问题"] --> G2["Agent 规划搜索策略"]
+        G2 --> G3["多路并行搜索(6-8次)<br/>Dense+BM25+HyDE"]
+        G3 --> G4["自动读取 Top 页面"]
+        G4 --> G5["上下文多级压缩"]
+        G5 --> G6{"Agent 评估<br/>信息充足?"}
+        G6 -->|"否"| G2
+        G6 -->|"是"| G7["LLM 综合生成 + 引用"]
+    end
+
+    E1 -.-> F3
+    E2 -.-> F3
+    E1 -.-> G3
+    E2 -.-> G3
 ```
 
 ## 技术栈

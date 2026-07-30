@@ -28,6 +28,12 @@ Thumbs.db
 # Jupyter
 .ipynb_checkpoints/
 
+# 演示文稿/视频/架构图（不上传）
+*.ppt
+*.pptx
+*.mp4
+*.drawio
+
 # 临时文件
 *.log
 *.tmp
